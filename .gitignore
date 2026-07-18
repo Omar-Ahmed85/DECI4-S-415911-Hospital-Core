@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment variables
+.env
+*/.env
+.env.local
+*/.env.local
+
+# Build output
+dist/
+build/
+*/dist/
+*/build/
+
+# Logs
+*.log
+npm-debug.log*
+*/npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Test coverage
+coverage/
+*/coverage/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Playwright
+e2e/test-results/
+e2e/playwright-report/
+e2e/playwright/.cache/
+
+# Local MongoDB data (Docker)
+infra/docker/mongo-data/
+
+# Kubernetes TLS certs (generated locally)
+infra/kubernetes/tls.crt
+infra/kubernetes/tls.key
+
+# Project Planning
+plans/

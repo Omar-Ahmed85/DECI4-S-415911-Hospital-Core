@@ -1,0 +1,40 @@
+:root {
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    color: #213547;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    background: #f5f7fa;
+}
+
+button {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+}
+
+button:hover {
+    background: #e0e0e0;
+}
+
+input, select {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+table {
+    width: 100%;
+}
+
+th {
+    background: #f0f0f0;
+}

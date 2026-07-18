@@ -1,0 +1,13 @@
+{
+    "testEnvironment": "jsdom",
+    "setupFiles": ["./src/tests/jest.setup.js"],
+    "setupFilesAfterEnv": ["./src/tests/setupTests.js"],
+    "moduleNameMapper": {
+        "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+        "^../api/client$": "<rootDir>/src/tests/__mocks__/apiClient.js",
+        "^../api/appointmentClient$": "<rootDir>/src/tests/__mocks__/apptClient.js"
+    },
+    "transform": {
+        "^.+\\.(js|jsx)$": "babel-jest"
+    }
+}

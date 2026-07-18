@@ -1,0 +1,6 @@
+global.importMeta = {
+    env: {
+        VITE_API_URL: 'http://localhost:5000/api',
+        VITE_APPOINTMENT_API_URL: 'http://localhost:5001/api'
+    }
+};
