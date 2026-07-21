@@ -28,12 +28,26 @@ jobs:
       - run: npm ci
       - run: npm test -- --ci --watchAll=false
 
-  unit-tests-appointment-service:
-    name: Unit Tests (Appointment Service)
+  integration-tests-appointment-service:
+    name: Integration Tests (Appointment Service)
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: ./appointment-service
+    env:
+      APPOINTMENT_MONGODB_URI: mongodb://localhost:27017/hospital-appointments-test
+      NODE_ENV: test
+      APPOINTMENT_SERVICE_PORT: 5099
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,6 +56,7 @@ jobs:
           cache: 'npm'
           cache-dependency-path: appointment-service/package-lock.json
       - run: npm ci
+      - run: npm run test:integration
 
   integration-tests-backend:
     name: Integration Tests (Backend)
@@ -183,7 +198,7 @@ jobs:
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
-    needs: [unit-tests-frontend, unit-tests-appointment-service, integration-tests-backend, e2e-tests, lighthouse]
+    needs: [unit-tests-frontend, integration-tests-appointment-service, integration-tests-backend, e2e-tests, lighthouse]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4

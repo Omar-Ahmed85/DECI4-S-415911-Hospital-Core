@@ -15,7 +15,7 @@ class AppointmentService {
     }
 
     async update(id, data) {
-        return await Appointment.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+        return await Appointment.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true });
     }
 
     async delete(id) {
