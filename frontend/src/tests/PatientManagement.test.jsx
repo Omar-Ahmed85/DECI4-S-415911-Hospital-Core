@@ -13,7 +13,8 @@ jest.mock('../hooks/useApi', () => ({
     usePatientHistory: () => ({ data: [] }),
     useCreatePatient: () => ({ mutate: jest.fn() }),
     useUpdatePatient: () => ({ mutate: jest.fn() }),
-    useDeletePatient: () => ({ mutate: jest.fn() })
+    useDeletePatient: () => ({ mutate: jest.fn() }),
+    useCreateMedicalHistory: () => ({ mutate: jest.fn() })
 }));
 
 function renderWith(ui) {
@@ -25,7 +26,7 @@ describe('PatientManagement', () => {
     it('renders heading and patient list', async () => {
         renderWith(<PatientManagement />);
         await waitFor(() => {
-            expect(screen.getByText('Patient Management')).toBeInTheDocument();
+            expect(screen.getByText('Patient directory')).toBeInTheDocument();
             expect(screen.getByText('Alice')).toBeInTheDocument();
             expect(screen.getByText('Bob')).toBeInTheDocument();
         });
@@ -44,17 +45,17 @@ describe('PatientManagement', () => {
 
     it('opens Add patient form on button click', async () => {
         renderWith(<PatientManagement />);
-        const addBtn = screen.getByRole('button', { name: 'Add Patient' });
+        const addBtn = screen.getByRole('button', { name: '+ New patient' });
         fireEvent.click(addBtn);
         await waitFor(() => {
-            expect(screen.getByText('Add New Patient')).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+            expect(screen.getByText('Register new patient')).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: 'Add to registry' })).toBeInTheDocument();
         });
     });
 
     it('renders search input', async () => {
         renderWith(<PatientManagement />);
-        const input = screen.getByPlaceholderText('Search patients by name or contact...');
+        const input = screen.getByPlaceholderText('Search by name or contact...');
         expect(input).toBeInTheDocument();
         fireEvent.change(input, { target: { value: 'Alice' } });
         expect(input.value).toBe('Alice');
