@@ -26,30 +26,30 @@ describe('AppointmentScheduling', () => {
     it('renders heading and appointment rows', async () => {
         renderWith(<AppointmentScheduling />);
         await waitFor(() => {
-            expect(screen.getByText('Appointment Scheduling')).toBeInTheDocument();
+            expect(screen.getByText('Appointments')).toBeInTheDocument();
             expect(screen.getByText('Alice')).toBeInTheDocument();
         });
     });
 
     it('shows Book Appointment button', async () => {
         renderWith(<AppointmentScheduling />);
-        expect(screen.getByRole('button', { name: 'Book Appointment' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: '+ Book appointment' })).toBeInTheDocument();
     });
 
     it('opens booking form on button click', async () => {
         renderWith(<AppointmentScheduling />);
-        fireEvent.click(screen.getByRole('button', { name: 'Book Appointment' }));
+        fireEvent.click(screen.getByRole('button', { name: '+ Book appointment' }));
         await waitFor(() => {
-            expect(screen.getByText('Book New Appointment')).toBeInTheDocument();
-            expect(screen.getByText('Patient:')).toBeInTheDocument();
-            expect(screen.getByText('Doctor:')).toBeInTheDocument();
+            expect(screen.getByText('Book an appointment')).toBeInTheDocument();
+            expect(screen.getByText('Choose a patient')).toBeInTheDocument();
+            expect(screen.getByText('Choose a provider')).toBeInTheDocument();
         });
     });
 
     it('renders status select with current status', async () => {
         renderWith(<AppointmentScheduling />);
         await waitFor(() => screen.getByText('Alice'));
-        const select = screen.getByRole('combobox');
+        const select = screen.getByLabelText('Appointment status');
         expect(select.value).toBe('scheduled');
     });
 

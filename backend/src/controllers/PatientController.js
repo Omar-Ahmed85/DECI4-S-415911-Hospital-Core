@@ -76,6 +76,15 @@ class PatientController {
             next(error);
         }
     }
+
+    async addMedicalHistory(req, res, next) {
+        try {
+            const entry = await PatientService.addMedicalHistory(req.params.id, req.body);
+            res.status(201).json({ message: 'History entry added', entry });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new PatientController();

@@ -17,6 +17,15 @@ app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(503).json({ error: 'Database unavailable' });
+    }
+});
+
 app.use('/api/health', healthRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);

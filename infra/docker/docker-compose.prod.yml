@@ -1,0 +1,63 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: hospital-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../../backend
+    container_name: hospital-backend
+    restart: unless-stopped
+    command: ["npm", "run", "start"]
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://mongo:27017/hospital
+      MONGODB_URI_ATLAS: mongodb://mongo:27017/hospital
+      NODE_ENV: production
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  appointment-service:
+    build:
+      context: ../../appointment-service
+    container_name: hospital-appointment-service
+    restart: unless-stopped
+    command: ["npm", "run", "start"]
+    ports:
+      - "5001:5001"
+    environment:
+      APPOINTMENT_SERVICE_PORT: 5001
+      APPOINTMENT_MONGODB_URI: mongodb://mongo:27017/hospital-appointments
+      APPOINTMENT_MONGODB_URI_ATLAS: mongodb://mongo:27017/hospital-appointments
+      NODE_ENV: production
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../../frontend
+      target: production
+    container_name: hospital-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - appointment-service
+
+volumes:
+  mongo-data:

@@ -10,9 +10,15 @@ const patientRules = [
     body('gender').isIn(['Male', 'Female', 'Other']).withMessage('Gender must be Male, Female, or Other')
 ];
 const idRule = param('id').isMongoId().withMessage('Invalid patient ID');
+const historyRules = [
+    body('diagnosis').trim().notEmpty().withMessage('Diagnosis is required'),
+    body('treatment').optional().isString(),
+    body('notes').optional().isString()
+];
 
 router.get('/search', PatientController.search.bind(PatientController));
 router.get('/:id/history', idRule, validate, PatientController.getMedicalHistory.bind(PatientController));
+router.post('/:id/history', idRule, historyRules, validate, PatientController.addMedicalHistory.bind(PatientController));
 router.get('/', PatientController.getAll.bind(PatientController));
 router.post('/', patientRules, validate, PatientController.create.bind(PatientController));
 router.get('/:id', idRule, validate, PatientController.getById.bind(PatientController));

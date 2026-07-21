@@ -1,0 +1,216 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  unit-tests-frontend:
+    name: Unit Tests (Frontend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --ci --watchAll=false
+
+  integration-tests-appointment-service:
+    name: Integration Tests (Appointment Service)
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: ./appointment-service
+    env:
+      APPOINTMENT_MONGODB_URI: mongodb://localhost:27017/hospital-appointments-test
+      NODE_ENV: test
+      APPOINTMENT_SERVICE_PORT: 5099
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: appointment-service/package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+
+  integration-tests-backend:
+    name: Integration Tests (Backend)
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: ./backend
+    env:
+      MONGODB_URI: mongodb://localhost:27017/hospital-test
+      NODE_ENV: test
+      PORT: 5000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run test:integration
+
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      MONGODB_URI: mongodb://localhost:27017/hospital-e2e
+      APPOINTMENT_MONGODB_URI: mongodb://localhost:27017/hospital-appointments-e2e
+      PORT: 5000
+      APPOINTMENT_SERVICE_PORT: 5001
+      VITE_API_URL: http://localhost:5000/api
+      VITE_APPOINTMENT_API_URL: http://localhost:5001/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+            appointment-service/package-lock.json
+            e2e/package-lock.json
+      - name: Install backend deps
+        working-directory: ./backend
+        run: npm ci
+      - name: Install appointment-service deps
+        working-directory: ./appointment-service
+        run: npm ci
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm ci
+      - name: Install e2e deps
+        working-directory: ./e2e
+        run: npm ci
+      - name: Install Playwright browsers
+        working-directory: ./e2e
+        run: npx playwright install --with-deps chromium
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+      - name: Start backend
+        working-directory: ./backend
+        run: npm start &
+      - name: Start appointment-service
+        working-directory: ./appointment-service
+        run: npm start &
+      - name: Wait for backend health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:5000/api/health; then break; fi
+            sleep 2
+          done
+      - name: Seed e2e database
+        working-directory: ./backend
+        run: node src/seed.js
+      - name: Wait for appointment-service health
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:5001/api/appointments; then break; fi
+            sleep 2
+          done
+      - name: Run Playwright tests
+        working-directory: ./e2e
+        run: npx playwright test
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm ci
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+      - name: Run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: npx @lhci/cli@latest autorun
+      - name: Upload Lighthouse report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 7
+
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    needs: [unit-tests-frontend, integration-tests-appointment-service, integration-tests-backend, e2e-tests, lighthouse]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx -p semantic-release@latest -p @semantic-release/changelog@latest -p @semantic-release/git@latest -p @semantic-release/github@latest semantic-release

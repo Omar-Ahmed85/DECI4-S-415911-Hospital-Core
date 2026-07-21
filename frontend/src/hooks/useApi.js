@@ -95,6 +95,16 @@ export function useDeletePatient() {
     });
 }
 
+export function useCreateMedicalHistory() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ patientId, data }) => api.post(`/patients/${patientId}/history`, data).then(r => r.data),
+        onSettled: (data, err, { patientId }) => {
+            qc.invalidateQueries({ queryKey: ['patient', patientId, 'history'] });
+        }
+    });
+}
+
 export function useDoctors() {
     return useQuery({
         queryKey: ['doctors'],
