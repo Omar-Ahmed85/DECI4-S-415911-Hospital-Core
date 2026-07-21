@@ -187,6 +187,7 @@ jobs:
         working-directory: ./frontend
         run: npm run build
       - name: Run Lighthouse CI
+        working-directory: ./frontend
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: npx @lhci/cli@latest autorun
@@ -195,7 +196,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
-          path: .lighthouseci/
+          path: frontend/.lighthouseci/
           retention-days: 7
 
   release:
