@@ -24,6 +24,7 @@ services:
     environment:
       PORT: 5000
       MONGODB_URI: mongodb://mongo:27017/hospital
+      MONGODB_URI_ATLAS: mongodb://mongo:27017/hospital
       NODE_ENV: production
     depends_on:
       mongo:
@@ -40,6 +41,7 @@ services:
     environment:
       APPOINTMENT_SERVICE_PORT: 5001
       APPOINTMENT_MONGODB_URI: mongodb://mongo:27017/hospital-appointments
+      APPOINTMENT_MONGODB_URI_ATLAS: mongodb://mongo:27017/hospital-appointments
       NODE_ENV: production
     depends_on:
       mongo:
