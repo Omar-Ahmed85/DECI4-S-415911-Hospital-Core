@@ -11,8 +11,13 @@ class PatientService {
     }
 
     async create(data) {
-        const patient = new Patient(data);
-        return await patient.save();
+        const { medicalHistory, ...patientData } = data;
+        const patient = new Patient(patientData);
+        const saved = await patient.save();
+        if (medicalHistory && medicalHistory.diagnosis) {
+            await MedicalHistory.create({ patientId: saved._id, ...medicalHistory });
+        }
+        return saved;
     }
 
     async update(id, data) {
@@ -35,6 +40,12 @@ class PatientService {
 
     async getMedicalHistory(patientId) {
         return await MedicalHistory.find({ patientId }).sort({ date: -1 });
+    }
+
+    async addMedicalHistory(patientId, data) {
+        const patient = await Patient.findById(patientId);
+        if (!patient) return null;
+        return await MedicalHistory.create({ patientId, ...data });
     }
 }
 
