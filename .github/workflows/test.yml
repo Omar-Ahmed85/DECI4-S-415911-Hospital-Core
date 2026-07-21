@@ -149,6 +149,9 @@ jobs:
             if curl -fsS http://localhost:5000/api/health; then break; fi
             sleep 2
           done
+      - name: Seed e2e database
+        working-directory: ./backend
+        run: node src/seed.js
       - name: Wait for appointment-service health
         run: |
           for i in {1..30}; do
