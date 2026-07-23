@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-runtime-config
+data:
+  runtime-config.js: |
+    window.RUNTIME_CONFIG = {
+      API_URL: "https://hospital.local/api",
+      APPOINTMENT_API_URL: "https://hospital.local/api/"
+    };

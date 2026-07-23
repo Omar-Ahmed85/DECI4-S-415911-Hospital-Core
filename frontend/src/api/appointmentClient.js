@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_APPOINTMENT_API_URL || 'http://localhost:5001/api';
+const baseURL = window.RUNTIME_CONFIG?.APPOINTMENT_API_URL
+    || import.meta.env.VITE_APPOINTMENT_API_URL
+    || 'http://localhost:5001/api';
 
 const appointmentApi = axios.create({ baseURL });
 
