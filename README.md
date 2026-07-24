@@ -1,286 +1,66 @@
-# Hospital Core Healthcare Management System
+# Hospital Core
 
-> Production-Ready Cloud-Native Healthcare Management Platform
+Healthcare management platform for patients, doctors, medical histories, and appointments.
 
-## Project Overview
+## Stack
 
-Hospital Core is a cloud-native healthcare management platform designed to manage patients, doctors, and appointments through a scalable full-stack architecture.
+- Frontend: React, Vite, React Query, Axios
+- Core API: Node.js, Express, Mongoose
+- Appointment API: independent Node.js and Express microservice
+- Database: MongoDB
+- Testing: Jest, React Testing Library, Supertest, Playwright
+- Delivery: Docker Compose, Kubernetes/Minikube, GitHub Actions, Lighthouse CI, semantic-release
 
-The platform demonstrates modern software engineering practices including:
+## Architecture
 
-- React Single Page Application (SPA)
-- Node.js + Express Backend
-- MongoDB Database
-- Appointment Booking Microservice
-- Docker Containerization
-- Docker Compose Orchestration
-- Kubernetes Deployment (Minikube)
-- GitHub Actions CI/CD
-- Automated Testing
-- Lighthouse Quality Audits
-- Semantic Versioning
-- MongoDB Atlas Production Database
-- Netlify + Vercel Cloud Deployment
-
----
-
-# Features
-
-## Frontend Features
-
-### Doctor Dashboard
-- Patient statistics
-- Appointment summaries
-- Activity overview
-- Live updates
-
-### Patient Management
-- Add patient
-- Edit patient
-- Delete patient
-- Search patients
-- View medical history
-
-### Appointment Scheduling
-- Create appointments
-- Update appointments
-- Cancel appointments
-- Appointment status tracking
-
-### Performance Features
-
-#### React Query
-- API response caching
-- Background synchronization
-- Automatic refetching
-- Optimized network requests
-
-#### Optimistic Updates
-- Instant UI feedback
-- Reduced perceived latency
-- Automatic rollback on failure
-
----
-
-## Backend Features
-
-### MVC Architecture
-
-```text
-backend/
-├── controllers/
-├── models/
-├── routes/
-├── middleware/
-├── services/
-├── config/
-└── app.js
+```mermaid
+flowchart LR
+    User[User] --> Frontend[React Frontend]
+    Frontend -->|/api/patients\n/api/doctors| Backend[Core Backend API]
+    Frontend -->|/api/appointments| Appointments[Appointment Service]
+    Backend --> HospitalDB[(MongoDB: hospital)]
+    Appointments --> AppointmentsDB[(MongoDB: hospital-appointments)]
 ```
 
-### REST API
+Backend owns patients, doctors, and medical histories. Appointment service owns appointment booking and availability. Services deploy independently and do not import each other's source code.
 
-- Patient Management APIs
-- Doctor Management APIs
-- Appointment APIs
-- Health Check APIs
-
-### Security
-
-- Environment Variables
-- MongoDB Connection Protection
-- Input Validation
-- Error Handling Middleware
-
----
-
-## Appointment Booking Microservice
-
-The Appointment Booking module is separated from the main backend into its own microservice.
-
-### Responsibilities
-
-- Appointment Creation
-- Appointment Updates
-- Appointment Cancellation
-- Appointment Availability Checks
-
-### Benefits
-
-- Independent deployment
-- Horizontal scaling
-- Better fault isolation
-- Improved maintainability
-
----
-
-# Monorepo Structure
+## Repository Layout
 
 ```text
-Student-ID-Hospital-Core/
-
-├── frontend/
-│
-├── backend/
-│
-├── appointment-service/
-│
+DECI4-S-415911-Hospital-Core/
+├── frontend/                 React and Vite SPA
+├── backend/                  Core patient and doctor API
+├── appointment-service/      Standalone appointment API
+├── e2e/                      Playwright end-to-end tests
 ├── infra/
-│   ├── docker/
-│   ├── kubernetes/
-│   └── diagrams/
-│
-├── .github/
-│   └── workflows/
-│
-└── README.md
+│   ├── docker/               Development and production Compose files
+│   ├── kubernetes/           Minikube manifests, TLS, Ingress, HPA
+│   └── diagrams/             VPC blueprint
+└── .github/workflows/        CI workflow
 ```
 
----
+## Local Setup
 
-# System Architecture
+### Prerequisites
 
-```text
-┌─────────────────┐
-│     React UI    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Express Backend │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│    MongoDB      │
-└─────────────────┘
+- Node.js 24+
+- npm
+- MongoDB, or Docker Desktop
+- Docker Desktop and Docker Compose for container workflow
+- Minikube and `kubectl` for Kubernetes workflow
 
-        ▲
-        │
-┌─────────────────────────┐
-│ Appointment Microservice│
-└─────────────────────────┘
+### Environment Files
+
+Copy each `.env.example` file to `.env`. Do not commit `.env` files.
+
+```powershell
+Copy-Item backend\.env.example backend\.env
+Copy-Item appointment-service\.env.example appointment-service\.env
+Copy-Item frontend\.env.example frontend\.env
 ```
 
----
+`backend/.env`:
 
-# Cloud Architecture (VPC Blueprint)
-
-```text
-Internet
-    │
-    ▼
-
-┌───────────────────────────────┐
-│         Public Subnet         │
-├───────────────────────────────┤
-│ Netlify Frontend              │
-│ Vercel Backend API Gateway    │
-└──────────────┬────────────────┘
-               │
-               ▼
-
-┌───────────────────────────────┐
-│         Private Subnet        │
-├───────────────────────────────┤
-│ MongoDB Atlas Cluster         │
-│ Internal Services             │
-└───────────────────────────────┘
-```
-
-### Security Separation
-
-Public Layer:
-- React Frontend
-- API Gateway
-
-Private Layer:
-- MongoDB Atlas
-- Internal Services
-- Sensitive Healthcare Data
-
----
-
-# Data Flow Diagram
-
-```text
-User
- │
- ▼
-React Frontend
- │
- ▼
-Express Backend
- │
- ├────────► MongoDB
- │
- ▼
-Appointment Service
- │
- ▼
-MongoDB
-```
-
----
-
-# Technology Stack
-
-## Frontend
-
-- React
-- React Query
-- Axios
-- Jest
-- React Testing Library
-
-## Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-
-## DevOps
-
-- Docker
-- Docker Compose
-- Kubernetes
-- GitHub Actions
-- Lighthouse CI
-
-## Cloud
-
-- Netlify (Frontend)
-- Vercel (Backend)
-- MongoDB Atlas (Production Database)
-
----
-
-# Getting Started
-
-## Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Docker (for containerized development)
-- Docker Compose (for orchestrated development)
-- MongoDB (local or Atlas)
-- Kubernetes CLI (kubectl)
-- Minikube (for local Kubernetes)
-
-## Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd Student-ID-Hospital-Core
-```
-
-### 2. Environment Setup
-
-Create `.env` files in each service directory:
-
-**Backend (.env in backend/)**
 ```env
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/hospital
@@ -288,135 +68,318 @@ MONGODB_URI_ATLAS=mongodb+srv://user:pass@cluster.mongodb.net/hospital
 NODE_ENV=development
 ```
 
-**Appointment Service (.env in appointment-service/)**
+`appointment-service/.env`:
+
 ```env
 APPOINTMENT_SERVICE_PORT=5001
 APPOINTMENT_MONGODB_URI=mongodb://localhost:27017/hospital-appointments
+APPOINTMENT_MONGODB_URI_ATLAS=mongodb+srv://user:pass@cluster.mongodb.net/hospital-appointments
+NODE_ENV=development
 ```
 
-**Frontend (.env in frontend/)**
+`frontend/.env`:
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 VITE_APPOINTMENT_API_URL=http://localhost:5001/api
 ```
 
-### 3. Install Dependencies
+`VITE_*` values are bundled by Vite during build. They are not container runtime settings.
 
-```bash
-# Backend
-cd backend && npm install
+### Run Services Directly
 
-# Frontend
-cd frontend && npm install
+Use separate terminals:
 
-# Appointment Service
-cd appointment-service && npm install
+```powershell
+cd backend
+npm install
+npm run dev
 ```
 
-### 4. Start the Services
-
-```bash
-# Backend
-cd backend && npm run dev
-
-# Frontend
-cd frontend && npm run dev
-
-# Appointment Service
-cd appointment-service && npm start
+```powershell
+cd appointment-service
+npm install
+npm start
 ```
 
-### 5. Seed the Database
-
-```bash
-node backend/src/seed.js
+```powershell
+cd frontend
+npm install
+npm run dev
 ```
 
----
+Endpoints:
 
-# API Documentation
+| Service | Local URL |
+|---|---|
+| Frontend | `http://localhost:5173` |
+| Core backend | `http://localhost:5000` |
+| Appointment service | `http://localhost:5001` |
 
-## Health Check
+### Seed Core Database
 
-- `GET /api/health` - Check backend health status
+`backend/src/seed.js` deletes all patients, doctors, and medical histories before inserting sample records. Do not run it against data that must be preserved.
 
-## Patient Management
+```powershell
+cd backend
+node src/seed.js
+```
 
-- `GET /api/patients` - List all patients
-- `POST /api/patients` - Create a new patient
-- `GET /api/patients/:id` - Get patient by ID
-- `PUT /api/patients/:id` - Update patient
-- `DELETE /api/patients/:id` - Delete patient
+## Tests
 
-## Doctor Management
+Run from each named directory:
 
-- `GET /api/doctors` - List all doctors
-- `GET /api/doctors/:id` - Get doctor by ID
-
-## Appointment Management (Microservice)
-
-- `POST /api/appointments` - Create appointment
-- `GET /api/appointments` - List all appointments
-- `PUT /api/appointments/:id` - Update appointment
-- `DELETE /api/appointments/:id` - Cancel appointment
-
----
-
-# Testing
-
-```bash
-# Unit Tests
+```powershell
+cd frontend
 npm test
+```
 
-# Integration Tests
+```powershell
+cd backend
 npm run test:integration
-
-# E2E Tests
-npm run test:e2e
 ```
 
----
-
-# Docker Development
-
-```bash
-# Start all services
-docker-compose up --build
-
-# Stop all services
-docker-compose down -v
+```powershell
+cd appointment-service
+npm run test:integration
 ```
 
----
+```powershell
+cd e2e
+npm install
+npx playwright test
+```
 
-# Kubernetes Development
+CI runs frontend unit tests, backend and appointment integration tests, Playwright E2E tests, Lighthouse CI, and semantic-release on `master` pushes.
 
-```bash
-# Start Minikube
+## Docker Compose
+
+Development Compose provides MongoDB plus hot reload for frontend and both APIs:
+
+```powershell
+docker compose -f infra/docker/docker-compose.dev.yml up --build
+```
+
+Stop and remove data volume:
+
+```powershell
+docker compose -f infra/docker/docker-compose.dev.yml down -v
+```
+
+Production-style local Compose:
+
+```powershell
+docker compose -f infra/docker/docker-compose.prod.yml up --build
+```
+
+## Kubernetes and Minikube
+
+The manifests deploy frontend, backend, appointment service, MongoDB, backend HPA, NGINX Ingress, self-signed TLS, and frontend runtime config.
+
+```powershell
 minikube start
-
-# Enable ingress
 minikube addons enable ingress
-
-# Deploy applications
 kubectl apply -f infra/kubernetes/
-
-# Check status
-kubectl get pods,svc,ingress
+kubectl get deployments,pods,svc,ingress,hpa
 ```
 
----
+With Minikube Docker driver on Windows, run this in an elevated terminal and keep it running:
 
-# CI/CD Pipeline
+```powershell
+minikube tunnel
+```
 
-The GitHub Actions pipeline includes:
-- Automated testing
-- Lighthouse quality audits
-- Semantic versioning
-- Automated releases
+Map host name to tunnel loopback address in `C:\Windows\System32\drivers\etc\hosts`:
 
----
+```text
+127.0.0.1 hospital.local
+```
 
-# License
+Then verify TLS Ingress:
 
-This project is part of a Software Engineering program curriculum.
+```powershell
+curl.exe -k https://hospital.local
+curl.exe -k https://hospital.local/api/health
+curl.exe -k https://hospital.local/runtime-config.js
+```
+
+### Frontend Runtime Config
+
+Kubernetes mounts ConfigMap key `runtime-config.js` into Nginx at `/usr/share/nginx/html/runtime-config.js`. Browser loads it before Vite bundle.
+
+```text
+https://hospital.local/runtime-config.js
+```
+
+Config file source: `infra/kubernetes/frontend-runtime-config.yaml`.
+
+Current Kubernetes routes:
+
+| Browser path | Service |
+|---|---|
+| `/` | `frontend-service` |
+| `/api/appointments` | `appointment-service` |
+| `/api` | `backend-service` |
+
+Ingress uses longest matching path, so appointment routes do not collide with core backend routes.
+
+## API Documentation
+
+### Core Backend
+
+Base URL: `http://localhost:5000/api`
+
+| Method | Path | Success | Purpose |
+|---|---|---|---|
+| GET | `/health` | 200 | Service health |
+| GET | `/patients` | 200 | List patients |
+| POST | `/patients` | 201 | Create patient |
+| GET | `/patients/search?q=value` | 200 | Search patients |
+| GET | `/patients/:id` | 200 | Get patient |
+| PUT | `/patients/:id` | 200 | Update patient |
+| DELETE | `/patients/:id` | 200 | Delete patient |
+| GET | `/patients/:id/history` | 200 | Get medical history |
+| POST | `/patients/:id/history` | 201 | Add medical history entry |
+| GET | `/doctors` | 200 | List doctors |
+| POST | `/doctors` | 201 | Create doctor |
+| GET | `/doctors/specialty/:specialty` | 200 | List doctors by specialty |
+| GET | `/doctors/:id` | 200 | Get doctor |
+| PUT | `/doctors/:id` | 200 | Update doctor |
+| DELETE | `/doctors/:id` | 200 | Delete doctor |
+
+Health response:
+
+```http
+GET /api/health
+```
+
+```json
+{ "status": "healthy" }
+```
+
+Create patient:
+
+```http
+POST /api/patients
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "John Doe",
+  "age": 35,
+  "gender": "Male",
+  "contact": "555-0101",
+  "address": "123 Main St"
+}
+```
+
+```json
+{
+  "message": "Patient created",
+  "id": "65f0c0000000000000000001",
+  "patient": {
+    "_id": "65f0c0000000000000000001",
+    "name": "John Doe",
+    "age": 35,
+    "gender": "Male",
+    "contact": "555-0101",
+    "address": "123 Main St"
+  }
+}
+```
+
+Create doctor:
+
+```http
+POST /api/doctors
+Content-Type: application/json
+```
+
+```json
+{
+  "name": "Dr. Sarah Lee",
+  "specialty": "Cardiology",
+  "department": "Heart Care",
+  "availability": ["Mon", "Wed", "Fri"]
+}
+```
+
+Core API returns `400` for invalid request data or IDs, `404` for missing resources, and `503` when MongoDB is unavailable.
+
+### Appointment Service
+
+Base URL: `http://localhost:5001/api/appointments`
+
+| Method | Path | Success | Purpose |
+|---|---|---|---|
+| GET | `/` | 200 | List appointments |
+| POST | `/` | 201 | Book appointment |
+| GET | `/availability?doctorId=:id&date=:date` | 200 | Check availability |
+| GET | `/patient/:patientId` | 200 | List patient's appointments |
+| GET | `/doctor/:doctorId` | 200 | List doctor's appointments |
+| GET | `/:id` | 200 | Get appointment |
+| PUT | `/:id` | 200 | Update appointment |
+| DELETE | `/:id` | 200 | Cancel appointment |
+
+Book appointment:
+
+```http
+POST /api/appointments
+Content-Type: application/json
+```
+
+```json
+{
+  "patientId": "65f0c0000000000000000001",
+  "doctorId": "65f0c0000000000000000002",
+  "date": "2026-07-01T09:00:00.000Z",
+  "reason": "Routine checkup"
+}
+```
+
+```json
+{
+  "message": "Appointment booked",
+  "id": "65f0c0000000000000000003",
+  "appointment": {
+    "_id": "65f0c0000000000000000003",
+    "patientId": "65f0c0000000000000000001",
+    "doctorId": "65f0c0000000000000000002",
+    "date": "2026-07-01T09:00:00.000Z",
+    "status": "scheduled",
+    "reason": "Routine checkup",
+    "notes": ""
+  }
+}
+```
+
+Appointment creation returns `409` when doctor is unavailable. Missing appointment records return `404`; unavailable database returns `503`.
+
+## Cloud and Network Blueprint
+
+Production components deploy separately: Netlify hosts frontend, Vercel hosts core backend, appointment service has its own deployment, and MongoDB Atlas holds production data. Configure real deployment URLs as deployment environment variables; no live URLs are recorded here.
+
+VPC design: [`infra/diagrams/vpc-blueprint.md`](infra/diagrams/vpc-blueprint.md).
+
+```mermaid
+flowchart LR
+    Browser[Browser] --> Netlify[Netlify Frontend]
+    Netlify --> Backend[Vercel Backend API]
+    Netlify --> Appointments[Appointment Service]
+    Backend --> Atlas[(MongoDB Atlas)]
+    Appointments --> Atlas
+```
+
+## Submission Evidence
+
+Not committed here: screenshots, demo video, live deployment URLs, and PR merge evidence. Capture those from actual environment before submission. Required terminal proof includes:
+
+```powershell
+kubectl get nodes
+kubectl get pods -o wide
+kubectl get services
+kubectl get ingress
+kubectl get hpa
+kubectl describe hpa
+```
